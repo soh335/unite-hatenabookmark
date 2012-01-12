@@ -10,10 +10,7 @@ let s:source = {
       \}
 
 function! unite#sources#hatenabookmark#define()
-  if exists('g:unite_hatenabookmark_username')
-    return s:source
-  endif
-  return {}
+  return s:source
 endfunction
 
 function! s:parse_pattern()
@@ -46,38 +43,55 @@ function! s:parse_args(res, obj)
 endfunction
 
 function! s:source.gather_candidates(args, context)
+
+  let users = []
+
+  if len(a:args) == 0
+    call add(users, g:unite_hatenabookmark_username)
+  else
+    let users = users + a:args
+  endif
+
   let bookmarks = []
-  let res = http#get(printf("http://b.hatena.ne.jp/%s/search.data", 
-        \ g:unite_hatenabookmark_username))
 
-  let i = 0
-  let obj = {}
-  let parse_res = s:parse_pattern()
+  for user in users
+    let res = http#get(printf("http://b.hatena.ne.jp/%s/search.data",
+          \ user))
 
-  for line in split(res.content, "\n")
-    if line =~ '^\d\+\t\d\+$'
-      break
-    endif
-
-    if i == 0
-      let obj.title = line
-    elseif i == 1
-      let obj.comment = line
-    elseif i == 2
-      let obj.url = line
-      call add (bookmarks, {
-            \ 'word': call("printf", s:parse_args(parse_res, obj)),
-            \ 'kind': 'uri',
-            \ 'source': 'hatenabookmark',
-            \ 'action__path': obj.url
-            \})
-      let i = 0
-      let obj = {}
+    if res.header[0] !~ '^HTTP/1.\d 2'
       continue
     endif
 
-    let i = i + 1
+    let i = 0
+    let obj = {}
+    let parse_res = s:parse_pattern()
+
+    for line in split(res.content, "\n")
+      if line =~ '^\d\+\t\d\+$'
+        break
+      endif
+
+      if i == 0
+        let obj.title = line
+      elseif i == 1
+        let obj.comment = line
+      elseif i == 2
+        let obj.url = line
+        call add (bookmarks, {
+              \ 'word': call("printf", s:parse_args(parse_res, obj)),
+              \ 'kind': 'uri',
+              \ 'source': 'hatenabookmark',
+              \ 'action__path': obj.url
+              \})
+        let i = 0
+        let obj = {}
+        continue
+      endif
+
+      let i = i + 1
+    endfor
   endfor
+
   return bookmarks
 endfunction
 
