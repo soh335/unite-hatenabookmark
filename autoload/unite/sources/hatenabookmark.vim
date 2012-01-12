@@ -5,7 +5,8 @@ endif
 let s:source = {
       \ 'name': 'hatenabookmark',
       \ 'action_table': {},
-      \ 'default_action': { 'uri' : 'open' }
+      \ 'default_action': { 'uri' : 'open' },
+      \ 'max_candidates': 30,
       \}
 
 function! unite#sources#hatenabookmark#define()
