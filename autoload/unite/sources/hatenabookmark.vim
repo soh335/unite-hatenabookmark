@@ -17,7 +17,7 @@ function! s:parse_pattern()
   let res = { 'pattern' : g:unite_hatenabookmark_print_pattern, 'indexes' : [] }
 
   let list = []
-  for type in ["comment", "title", "url"]
+  for type in ["comment", "title", "url", "username"]
     let index = match(res.pattern, printf('\[%s\]', type))
     if index > -1
       let res.pattern = substitute(res.pattern, printf('\[%s\]', type), '%s', "")
@@ -77,6 +77,7 @@ function! s:source.gather_candidates(args, context)
         let obj.comment = line
       elseif i == 2
         let obj.url = line
+        let obj.username = user
         call add (bookmarks, {
               \ 'word': call("printf", s:parse_args(parse_res, obj)),
               \ 'kind': 'uri',
