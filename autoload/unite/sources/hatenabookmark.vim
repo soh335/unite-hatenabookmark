@@ -55,7 +55,7 @@ function! s:source.gather_candidates(args, context)
   let bookmarks = []
 
   for user in users
-    let res = http#get(printf("http://b.hatena.ne.jp/%s/search.data",
+    let res = webapi#http#get(printf("http://b.hatena.ne.jp/%s/search.data",
           \ user))
 
     if res.header[0] !~ '^HTTP/1.\d 2'
